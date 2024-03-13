@@ -1,0 +1,489 @@
+package AssignmentNum1;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+// Class representing a Book
+class Book {
+    long bookID;
+    String title, author, genre, availabiltyStatus;
+}
+
+// Class representing a User, inherits from Book
+class User extends Book {
+    long userID;
+    String name,contactAddress,borrowedBooks;
+}
+
+// Class representing the Library, inherits from User
+class Library extends User {
+    String titleChoice;
+    Scanner sc=new Scanner(System.in);
+    static ArrayList storeUser = new ArrayList(); // Stores user information
+    static ArrayList storeBook = new ArrayList(); // Stores book information
+    static ArrayList allBooks = new ArrayList(); // Stores all books present in the library
+    static ArrayList byUser = new ArrayList(); // Stores books borrowed by users
+    static ArrayList booksinLib =new ArrayList(); // Stores books currently in the library
+    static ArrayList temporary = new ArrayList(); // Temporary storage for user and book data
+    ArrayList genres=new ArrayList(); // Stores book genres
+    ArrayList authors=new ArrayList(); // Stores book authors
+    ArrayList bookIDS=new ArrayList(); // Stores book IDs
+    ArrayList individualInfo = new ArrayList(); // Stores individual user's book info
+    static ArrayList names=new ArrayList(); // Stores user names
+    static ArrayList userSID=new ArrayList(); // Stores user IDs
+    static ArrayList borrowChecker=new ArrayList(); // Checks if a book is borrowed
+
+    // Method to add a new user
+    void addUser() {
+        boolean isValid=false;
+        try {
+            File f1 = new File("LibMgmtSystem.txt");
+        } catch (Exception e) {
+            System.out.println(" An Error Occurred Creating The File ! ");
+            e.printStackTrace();
+        }
+        char choice;
+        while(!isValid) {
+            System.out.print(" Please Enter The User's Name : ");
+            name = sc.nextLine();
+            isValid=true;
+            for (int i = 0; i < name.length(); i++) {
+                if (!Character.isLetter(name.charAt(i))&&name.charAt(i)!=' ') {
+                    isValid = false;
+                    System.out.println(" Invalid Input , Name Cannot contain anything other than an alphabet..Please Enter Again : ");
+                    break;
+                }
+            }
+        }
+        isValid=false;
+        while (!isValid) {
+            System.out.print("Please Allot The User An ID (only numbers, no spaces): ");
+            String input = sc.nextLine();
+
+            // Check if the input contains only numeric characters
+            if (input.matches("\\d+")) {
+                userID = Long.parseLong(input);
+                // Check if the input contains spaces
+                if (input.contains(" ")) {
+                    System.out.println("Invalid input. User ID should not contain spaces.");
+                } else {
+                    isValid = true; // Valid input
+                }
+            } else {
+                System.out.println("Invalid input. User ID should contain only numbers.");
+            }
+        }
+        while (storeUser.contains(userID)) {
+            System.out.println("This User ID is Already Present...Please Try Again!");
+            isValid = false; // Reset isValid flag for new input
+            while (!isValid) {
+                System.out.print("Enter a different User ID (only numbers, no spaces): ");
+                String input = sc.nextLine();
+
+                // Check if the input contains only numeric characters
+                if (input.matches("\\d+")) {
+                    userID = Long.parseLong(input);
+                    // Check if the input contains spaces
+                    if (input.contains(" ")) {
+                        System.out.println("Invalid input. User ID should not contain spaces.");
+                    } else {
+                        isValid = true; // Valid input
+                    }
+                } else {
+                    System.out.println("Invalid input. User ID should contain only numbers.");
+                }
+            }
+        }
+
+        // After the loop, userID contains a unique ID
+
+        while (userID <= 0) {
+            System.out.println(" User ID Can't Be Less Than Or Equal To Zero , Please Enter Again ! ");
+            userID = sc.nextLong();
+            sc.nextLine();
+        }
+        System.out.print(" Please Enter The User's Contact Address : ");
+        contactAddress = sc.nextLine();
+        System.out.println("\n");
+        storeUser.add(name);
+        storeUser.add(userID);
+        byUser.add(userID);
+        storeUser.add(contactAddress);
+        System.out.println(" The User's Info Has Been Added...\nYou (Librarian) May Display The Data Sheet When Needed ! \n");
+        try {
+            FileWriter fh = new FileWriter("LibMgmtSystem.txt",true);
+            fh.write(" Name : "+name + "\nUser ID : "+userID+"\nContact Address : "+contactAddress+"\n\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        userSID.add(userID);
+        names.add(name);
+        temporary.add(userID);
+        borrowChecker.add(userID);
+    }
+
+    // Method to add new books to the library
+    void addNewBooks() {
+        char choice='y';
+        while(choice=='y'||choice=='Y') {
+            if(name==null) {
+                System.out.println(" The User's Information Must Be Registered First Please ! \n");
+                addUser();
+            }
+            System.out.print(" Please Enter The Title Of The Book The User Want's To Add : ");
+            title = sc.nextLine();
+            while(storeBook.contains(title)) {
+                System.out.println(" This Book Is Already present , Please Ask The User To Enter Another Title ! ");
+                title=sc.nextLine();
+            }
+            booksinLib.add(title);
+            System.out.print(" Now Enter The Name Of The Author Of That Book : ");
+            author = sc.nextLine();
+            System.out.print(" Now Enter The Book ID : ");
+            bookID = sc.nextLong();
+            sc.nextLine();
+            while(storeBook.contains(bookID)) {
+                System.out.println(" This Book ID Is Already Present...Please Enter Correct Book ID ");
+                bookID=sc.nextLong();
+                sc.nextLine();
+            }
+            System.out.print(" Please Enter The Genre Of The Book The User Want's To Add : ");
+            genre = sc.nextLine();
+            availabiltyStatus = "AVAILABLE";
+            storeBook.add(bookID);
+            allBooks.add(title);
+            storeBook.add(title);
+            storeBook.add(author);
+            storeBook.add(genre);
+            storeBook.add(availabiltyStatus);
+            System.out.println("\nDoes He/She Want To Add More Books ? (y/n) ");
+            choice=sc.next().charAt(0);
+            sc.nextLine();
+            try {
+                FileWriter fh = new FileWriter("LibMgmtSystem.txt", true);
+                fh.write("USER : "+name+"\nBook Added : "+title+"\nAuthor : "+author+"\nGenre : "+genre+"\nBook ID : "+bookID+"\nAvailability Status : "+availabiltyStatus+"\n\n");
+                fh.close();
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Method to allow a user to check out a book
+    void checkingOutBook() {
+        //idea where the user is asked to enter his name and is checked whether he visited the library before or no
+        if(userID==0) {
+            System.out.println(" The User's Information Must Be Registered first ! ");
+            addUser();
+        }
+        else if(storeBook.isEmpty()) {
+            System.out.println(" Please Add A Book First As The Library Is Empty ! ");
+            addNewBooks();
+        }
+        System.out.println(" Please Enter The Title Of The Book The User Want's To Borrow : ");
+        titleChoice=sc.nextLine();
+
+        if(storeBook.contains(titleChoice)) {
+            char choice='y';
+            int temp=storeBook.indexOf(titleChoice);
+            while(individualInfo.contains(titleChoice)) {
+                System.out.println(" The Book "+titleChoice+" Is Already Present ... Please Ask The User To Enter Some Other ");
+                titleChoice=sc.nextLine();
+            }
+            if(storeBook.isEmpty()) {
+                System.out.println(" Sorry...There Are No More Books Available In The Library ! ");
+                return;
+            }
+            System.out.println(" TRANSACTION SUCCESSFUL ... The User Has Borrowed Book "+titleChoice+" Of Author "+(storeBook.get(temp+1))+" Of Genre "+(storeBook.get(temp+2))+" And Book ID Of "+(storeBook.get(temp-1))+"\n");
+            booksinLib.remove(titleChoice);
+            temporary.add(titleChoice);
+            storeBook.set(temp+3,"Not Available");
+            storeBook.remove(titleChoice);
+            byUser.add(titleChoice);
+            if(!individualInfo.contains(titleChoice)) {
+                individualInfo.add(titleChoice);
+            }
+            else {
+                char tempChoice;
+                System.out.println(" The User Has Already Borrowed This Book ! .. Does He/She Want To Borrow Some Other Book ? ");
+                tempChoice=sc.next().charAt(0);
+                sc.nextLine();
+                if(tempChoice=='y'||tempChoice=='Y') {
+                    checkingOutBook();
+                }
+                else {
+                    return;
+                }
+            }
+            genres.add(storeBook.get(temp+1));
+            while(individualInfo.contains(bookID)) {
+                System.out.println(" The Book With ID "+bookID+" Is Already Present ... Please Enter The Proper Book ID : ");
+                bookID=sc.nextLong();
+                sc.nextLine();
+            }
+            bookIDS.add(storeBook.get(temp-1));
+            authors.add(storeBook.get(temp));
+            //individualInfo.add("New Book");
+            System.out.println("\n Does He/She Want More Books ? (y/n) \n");
+            choice=sc.next().charAt(0);
+            sc.nextLine();
+            if(choice=='y'||choice=='Y') {
+                checkingOutBook();
+            }
+            else {
+                System.out.println(" OK...The User ("+name+") Has Borrowed : ");
+                for(int i=0;i<individualInfo.size();i++) {
+                    if(individualInfo.get(i)==null) {
+                        break;
+                    }
+                    else {
+                        System.out.println(" Book : " + individualInfo.get(i)+"\nAuthor : "+authors.get(i)+"\nGenre : "+genres.get(i)+"\nBook ID : "+bookIDS.get(i));
+                    }
+                }
+                byUser.add("Unknown");
+            }
+        }
+        else { //book is not available in our library
+            char choice='y';
+            System.out.println(" This Book Is Not Available In The Library / Has Been Already Borrowed ");
+        }
+        try {
+            FileWriter fh = new FileWriter("LibMgmtSystem.txt", true);
+            fh.write(name+"\n");
+            for(int i=0;i<individualInfo.size();i++) {
+                fh.write("Book Borrowed : " + individualInfo.get(i) + "\nAuthor : "+authors.get(i)+"\nBook ID : "+bookIDS.get(i)+"\nGenre : "+genres.get(i)+"\n\n");
+            }
+            fh.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        temporary.add("New User");
+        borrowChecker.add("Borrowed");
+    }
+
+    // Method to display all books in the library
+    void displayingBooks() { //For The Librarian
+        System.out.println(" The Books Which Have Been In The Library (In History) Are : "+allBooks+"\n");
+        System.out.println(" The Books In Library Right Now Are : "+booksinLib+"\n");
+    }
+
+    // Method to allow a user to return a borrowed book
+    void returnBook() {
+        if(userID==0) {
+            System.out.println(" The User's Information Must Be Registered First ! ");
+            addUser();
+        }
+        char choice='y',borrowChoice;
+        String getTitle;
+        if(individualInfo.isEmpty()) {
+            System.out.println(" The User Must Borrow A Book First ! ... Does He/She Want To Borrow ? (y/n) ");
+            borrowChoice=sc.next().charAt(0);
+            sc.nextLine();
+            if(borrowChoice=='y'||borrowChoice=='Y') {
+                checkingOutBook();
+            }
+            else {
+                return;
+            }
+        }
+        while(choice=='y'||choice=='Y') {
+            System.out.println(" Enter The Name Of Book The User Want's To Return ? ");
+            getTitle=sc.nextLine();
+            if(!individualInfo.contains(getTitle)) {
+                System.out.println(" Sorry , You Have Not Borrowed This Book ! ");
+                return;
+            }
+            if(choice=='y'||choice=='Y'&&individualInfo.contains(getTitle)) {
+                if(individualInfo.isEmpty()) {
+                    System.out.println(" Sorry , The user ("+name+") has no more borrowed books ! ");
+                    return;
+                }
+                storeBook.add(getTitle);
+                int index = individualInfo.indexOf(getTitle);
+                System.out.println("RETURNED :\nBook : "+individualInfo.get(index)+"\nAuthor : "+authors.get(index)+"\nGenre : "+genres.get(index)+"\nBook ID : "+bookIDS.get(index));
+                try {
+                    FileWriter fw=new FileWriter("LibMgmtSystem.txt",true);
+                    fw.write(" USER :- "+name+" Returned Books \nBook : "+individualInfo.get(index)+"\nAuthor : "+authors.get(index)+"\nGenre : "+genres.get(index)+"\nBook ID : "+bookIDS.get(index)+"\n\n");
+                    fw.close();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+                individualInfo.remove(index);
+                authors.remove(index);
+                genres.remove(index);
+                bookIDS.remove(index);
+            }
+            else {
+                System.out.println(" This Book does not exist in our library database ! ");
+            }
+            System.out.println(" Does He/She Want to continue ? (y/n) ");
+            choice=sc.next().charAt(0);
+            sc.nextLine();
+        }
+        if(!individualInfo.isEmpty()) {
+            System.out.print(" The User ("+name+") still has not returned : \n");
+            for(int i=0;i<individualInfo.size();i++) {
+                System.out.println(" Book : "+individualInfo.get(i)+"\nAuthor : "+authors.get(i)+"\nGenre : "+genres.get(i)+"\nBook ID : "+bookIDS.get(i)+"\n");
+                try {
+                    FileWriter fw=new FileWriter("LibMgmtSystem.txt",true);
+                    fw.write(" USER :- "+name+" Books Remaining To Return \nBook : "+individualInfo.get(i)+"\nAuthor : "+authors.get(i)+"\nGenre : "+genres.get(i)+"\nBook ID : "+bookIDS.get(i)+"\n\n");
+                    fw.close();
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        else if(individualInfo.isEmpty()){
+            System.out.println(" Thank You For Returning All The Borrowed Books ! ");
+            return;
+        }
+    }
+
+    // Method to search for books by user ID
+    void searchingForBooksByUserID() { //not working correctly
+        long userID1=0;
+        char choice;
+        int temp;
+        boolean isValid=false;
+        while (!isValid) {
+            System.out.print(" Enter The User ID : ");
+            String input = sc.nextLine();
+
+            // Check if the input contains only numeric characters
+            if (input.matches("\\d+")) {
+                userID1 = Long.parseLong(input);
+                // Check if the input contains spaces
+                if (input.contains(" ")) {
+                    System.out.println("Invalid input. User ID should not contain spaces.");
+                } else {
+                    isValid = true; // Valid input
+                }
+            } else {
+                System.out.println("Invalid input. User ID should contain only numbers.");
+            }
+        }
+        if(userID==0) {
+            System.out.println(" The User's Information Must Be Registered First ! ");
+            addUser();
+        }
+        isValid=false;
+        while(userID1<=0) {
+            while (!isValid) {
+                System.out.print(" Enter The User ID : ");
+                String input = sc.nextLine();
+
+                // Check if the input contains only numeric characters
+                if (input.matches("\\d+")) {
+                    userID1 = Long.parseLong(input);
+                    // Check if the input contains spaces
+                    if (input.contains(" ")) {
+                        System.out.println("Invalid input. User ID should not contain spaces.");
+                    } else {
+                        isValid = true; // Valid input
+                    }
+                } else {
+                    System.out.println("Invalid input. User ID should contain only numbers.");
+                }
+            }
+        }
+        if(temporary.contains(userID1)) {
+            System.out.println(" Information (Borrowed Books) Of User ID : "+userID1+"\n");
+            temp = temporary.indexOf(userID1);
+            int temp2=borrowChecker.indexOf(userID1);
+            for(int i=temp;i<temporary.size();i++) {
+                Object element=temporary.get(i);
+                if(!"Borrowed".equals(borrowChecker.get(temp2+1))) {
+                    System.out.println(" The User with user ID "+userID1+" and name "+names.get(temp)+" has no borrowed books ! ");
+                    return;
+                }
+                else if(allBooks.contains(temporary.get(i))) {
+                    System.out.println(temporary.get(i)+"\n");
+                    try {
+                        FileWriter fw=new FileWriter("LibMgmtSystem.txt",true);
+                        fw.write(" Book Title : "+temporary.get(i)+"\n");
+                        fw.close();
+                    }
+                    catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        else {
+            System.out.println(" Sorry Such User ID Doesent Exist In Our Database , but the user can register himself/herself first and get started with the amazing experience ... Does He/She Want to do that ? (y/n) ");
+            choice=sc.next().charAt(0);
+            sc.nextLine();
+            if(choice=='y'||choice=='Y') {
+                addUser();
+            }
+            else {
+                return;
+            }
+        }
+    }
+}
+
+// Main class
+public class LibraryMgmt {
+    public static void main(String[] args) {
+        System.out.println("                                                LIBRARY MANAGEMENT SYSTEM \n\n");
+        System.out.println(" Welcome To Library Management System !\nYou (The Librarian) Have 6 Options To Choose From (Based On What The User Will Request You To Do)..GOOD LUCK ! \n\n ");
+        Library lib=new Library();
+        Scanner sc=new Scanner(System.in);
+        char choice='y';
+        while(choice=='y'||choice=='Y') {
+            System.out.println(" Enter The Operation You Want To Perform !\n\n1.Add User\n2.Add Books\n3.Checking out/borrowing book\n4.Displaying Books Present In Library At The Moment\n5.Returning A Borrowed Book\n6.Searching For A Book By User ID\n ");
+            int operationToPerform=0;
+            try {
+                operationToPerform=sc.nextInt();
+                sc.nextLine();
+            }
+            catch (Exception e) {
+                System.out.println(" Invalid Input !...Please Enter A Valid Integer Next Time. ");
+                sc.nextLine();
+                continue;
+            }
+            switch(operationToPerform) {
+                case 1:
+                    lib.addUser();
+                    break;
+                case 2:
+                    lib.addNewBooks();
+                    break;
+                case 3:
+                    lib.checkingOutBook();
+                    break;
+                case 4:
+                    lib.displayingBooks();
+                    break;
+                case 5:
+                    lib.returnBook();
+                    break;
+                case 6:
+                    lib.searchingForBooksByUserID();
+                    break;
+                default:
+                    System.out.println(" Invalid Input ! ");
+                    break;
+            }
+            System.out.println(" Does The User Want To Perform Some Other Operation ? (y/n) ");
+            choice=sc.next().charAt(0);
+            sc.nextLine();
+        }
+        char continueChoice;
+        System.out.println(" Are There More Users ? (y/n) ");
+        continueChoice=sc.next().charAt(0);
+        sc.nextLine();
+        if(continueChoice=='Y'||continueChoice=='y') {
+            main(args);
+        }
+        else {
+            System.out.println(" Thank You For Using Library Management System ! GOODBYE ");
+        }
+    }
+}
